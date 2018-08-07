@@ -320,7 +320,7 @@ int buspirate_spi_init(void)
 		 * response which came in over serial. Unfortunately that does not work reliably on Linux
 		 * with FTDI USB-serial.
 		 */
-		//sp_flush_incoming();
+		sp_flush_incoming();
 		/* The Bus Pirate can't handle UART input buffer overflow in BBIO mode, and sending a sequence
 		 * of 0x00 too fast apparently triggers such an UART input buffer overflow.
 		 */
