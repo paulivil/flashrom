@@ -34,7 +34,7 @@ ATTRS{idVendor}=="0403", ATTRS{idProduct}=="cff8", MODE="664", GROUP="plugdev"
 
 # Buspirate
 # http://dangerousprototypes.com/2009/10/08/bus-pirate-raw-spi-mode/
-ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="664", GROUP="plugdev"
+ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="fb00", MODE="664", GROUP="plugdev"
 
 # Dediprog SF100
 # http://www.dediprog.com/SPI-flash-in-circuit-programming/SF100
