@@ -235,7 +235,7 @@ int buspirate_spi_init(void)
 		dev = NULL;
 	}
 	if (!dev) {
-		msg_perr("No serial device given. Use flashrom -p buspirate_spi:dev=/dev/ttyUSB0\n");
+		msg_perr("No serial device given. Use flashrom -p buspirate_spi:dev=/dev/ttyACM0\n");
 		return 1;
 	}
 
@@ -252,7 +252,7 @@ int buspirate_spi_init(void)
 	}
 	free(tmp);
 
-	/* Extract serialspeed paramater */
+	/* Extract serialspeed parameter */
 	tmp = extract_programmer_param("serialspeed");
 	if (tmp) {
 		for (i = 0; serialspeeds[i].name; i++) {
@@ -674,6 +674,27 @@ static struct usb_device *get_device_by_vid_pid(uint16_t vid, uint16_t pid, unsi
 
 	return NULL;
 }
+	/* Here comes the USB stuff */
+
+	usb_init();
+
+	(void)usb_find_busses();
+
+	(void)usb_find_devices();
+
+	const uint16_t vid = devs_pickit2_spi[0].vendor_id;
+
+	const uint16_t pid = devs_pickit2_spi[0].device_id;
+
+	struct usb_device *dev = get_device_by_vid_pid(vid, pid, usedevice);
+
+	if (dev == NULL) {
+
+		msg_perr("Could not find a Bus Pirate on USB!\n");
+
+		return 1;
+
+	}
 
 	/* Skip Ack. */
 	memcpy(readarr, bp_commbuf + 1, readcnt);
