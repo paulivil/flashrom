@@ -656,6 +656,24 @@ static int buspirate_spi_send_command_v2(struct flashctx *flash, unsigned int wr
 		msg_perr("Protocol error while sending SPI write/read!\n");
 		return SPI_GENERIC_ERROR;
 	}
+/* Might be useful for other USB devices as well. static for now.
+ * device parameter allows user to specify one device of multiple installed */
+static struct usb_device *get_device_by_vid_pid(uint16_t vid, uint16_t pid, unsigned int device)
+{
+	struct usb_bus *bus;
+	struct usb_device *dev;
+
+	for (bus = usb_get_busses(); bus; bus = bus->next)
+		for (dev = bus->devices; dev; dev = dev->next)
+			if ((dev->descriptor.idVendor == vid) &&
+			    (dev->descriptor.idProduct == pid)) {
+				if (device == 0)
+					return dev;
+				device--;
+			}
+
+	return NULL;
+}
 
 	/* Skip Ack. */
 	memcpy(readarr, bp_commbuf + 1, readcnt);
