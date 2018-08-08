@@ -11,6 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
 #include <stdio.h>
@@ -38,7 +42,7 @@ static int buspirate_serialport_setup(char *dev)
 {
 	/* 115200bps, 8 databits, no parity, 1 stopbit */
 	sp_fd = sp_openserport(dev, BP_DEFAULTBAUD);
-	if (sp_fd == SER_INV_FD)
+ 	if (sp_fd == SER_INV_FD)
 		return 1;
 	return 0;
 }
@@ -235,7 +239,7 @@ int buspirate_spi_init(void)
 		dev = NULL;
 	}
 	if (!dev) {
-		msg_perr("No serial device given. Use flashrom -p buspirate_spi:dev=/dev/ttyACM0\n");
+		msg_perr("No serial device given. Use flashrom -p buspirate_spi:dev=/dev/ttyUSB0\n");
 		return 1;
 	}
 
@@ -252,7 +256,7 @@ int buspirate_spi_init(void)
 	}
 	free(tmp);
 
-	/* Extract serialspeed parameter */
+	/* Extract serialspeed paramater */
 	tmp = extract_programmer_param("serialspeed");
 	if (tmp) {
 		for (i = 0; serialspeeds[i].name; i++) {
@@ -320,7 +324,7 @@ int buspirate_spi_init(void)
 		 * response which came in over serial. Unfortunately that does not work reliably on Linux
 		 * with FTDI USB-serial.
 		 */
-		sp_flush_incoming();
+		//sp_flush_incoming();
 		/* The Bus Pirate can't handle UART input buffer overflow in BBIO mode, and sending a sequence
 		 * of 0x00 too fast apparently triggers such an UART input buffer overflow.
 		 */
@@ -543,10 +547,6 @@ int buspirate_spi_init(void)
 
 	/* Set SPI config: output type, idle, clock edge, sample */
 	bp_commbuf[0] = 0x80 | 0xa;
-	if (pullup == 1) {
-		bp_commbuf[0] &= ~(1 << 3);
-		msg_pdbg("Pull-ups enabled, so using HiZ pin output! (Open-Drain mode)\n");
-	}
 	ret = buspirate_sendrecv(bp_commbuf, 1, 1);
 	if (ret)
 		return 1;
@@ -655,45 +655,6 @@ static int buspirate_spi_send_command_v2(struct flashctx *flash, unsigned int wr
 	if (bp_commbuf[0] != 0x01) {
 		msg_perr("Protocol error while sending SPI write/read!\n");
 		return SPI_GENERIC_ERROR;
-	}
-/* Might be useful for other USB devices as well. static for now.
- * device parameter allows user to specify one device of multiple installed */
-static struct usb_device *get_device_by_vid_pid(uint16_t vid, uint16_t pid, unsigned int device)
-{
-	struct usb_bus *bus;
-	struct usb_device *dev;
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next)
-			if ((dev->descriptor.idVendor == vid) &&
-			    (dev->descriptor.idProduct == pid)) {
-				if (device == 0)
-					return dev;
-				device--;
-			}
-
-	return NULL;
-}
-	/* Here comes the USB stuff */
-
-	usb_init();
-
-	(void)usb_find_busses();
-
-	(void)usb_find_devices();
-
-	const uint16_t vid = devs_pickit2_spi[0].vendor_id;
-
-	const uint16_t pid = devs_pickit2_spi[0].device_id;
-
-	struct usb_device *dev = get_device_by_vid_pid(vid, pid, usedevice);
-
-	if (dev == NULL) {
-
-		msg_perr("Could not find a Bus Pirate on USB!\n");
-
-		return 1;
-
 	}
 
 	/* Skip Ack. */
